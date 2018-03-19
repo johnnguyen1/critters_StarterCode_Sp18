@@ -10,7 +10,6 @@ public class MyCritter7 extends TestCritter {
 
 	@Override
 	public boolean fight(String opponent) {
-
 		return true;
 	}
 

@@ -6,6 +6,7 @@ public class MyCritter6 extends TestCritter {
 	
 	@Override
 	public void doTimeStep() {
+		run(2);
 	}
 
 	@Override
