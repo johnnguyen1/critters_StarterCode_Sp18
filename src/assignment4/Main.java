@@ -41,13 +41,13 @@ public class Main {
      * @param args args can be empty.  If not empty, provide two parameters -- the first is a file name, 
      * and the second is test (for test output, where all output to be directed to a String), or nothing.
      */
-    
+
     public static void main(String[] args) {
 
         if (args.length != 0) {
             try {
                 inputFile = args[0];
-                kb = new Scanner(new File(inputFile));			
+                kb = new Scanner(new File(inputFile));
             } catch (FileNotFoundException e) {
                 System.out.println("USAGE: java Main OR java Main <input file> <test output>");
                 e.printStackTrace();
@@ -69,13 +69,32 @@ public class Main {
             kb = new Scanner(System.in); // use keyboard and console
         }
 
-        /* Do not alter the code above for your submission. */
-        /* Write your code below. */
-        
-        // System.out.println("GLHF");
-        
-        /* Write your code above */
+        // Do not alter the code above for your submission.
+        // Write your code below.
+        String input = kb.nextLine();
+        while(!input.equals("quit")){
+            if(input.equals("show")){
+                Critter.displayWorld();
+            }
+            else if(input.substring(0, 4).equals("step") || input.equals("step")){
+                Critter.worldTimeStep();
+                int step = Integer.parseInt(input.substring(5,input.length()));
+                for(int i = 1; i<step; i++){
+                    Critter.worldTimeStep();
+                }
+            }
+            else if(input.substring(0, 4).equals("seed")){
+                long step = Long.parseLong(input.substring(5,input.length()));
+                Critter.setSeed(step);
+            }
+            input = kb.nextLine();
+        }
+
+
+        //Write your code above
         System.out.flush();
+
+
 
     }
 }
