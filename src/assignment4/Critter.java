@@ -1,15 +1,10 @@
 package assignment4;
 /* CRITTERS Critter.java
  * EE422C Project 4 submission by
- * Replace <...> with your actual data.
- * <Student1 Name>
- * <Student1 EID>
- * <Student1 5-digit Unique No.>
- * <Student2 Name>
- * <Student2 EID>
- * <Student2 5-digit Unique No.>
+ * John Nguyen
+ * jhn595
  * Slip days used: <0>
- * Fall 2016
+ * Spring 2018
  */
 
 
@@ -73,22 +68,22 @@ public abstract class Critter {
         energy -= Params.walk_energy_cost;
         int d = direction;
         if (d == 2) {
-            decByOne(y_coord, 'y');
+            y_coord = decByOne(y_coord, 'y');
         } else if (d == 6) {
-            incByOne(y_coord, 'y');
+            y_coord = incByOne(y_coord, 'y');
         } else if (d == 0 || d == 1 || d == 7) {
-            incByOne(x_coord, 'x');
+            x_coord = incByOne(x_coord, 'x');
             if (d == 1) {
-                decByOne(y_coord, 'y');
+                y_coord = decByOne(y_coord, 'y');
             } else if (d == 7) {
-                incByOne(y_coord, 'y');
+                y_coord = incByOne(y_coord, 'y');
             }
         } else if (d == 3 || d == 4 || d == 5) {
-            decByOne(x_coord, 'x');
+            x_coord = decByOne(x_coord, 'x');
             if (d == 3) {
-                decByOne(y_coord, 'y');
+                y_coord = decByOne(y_coord, 'y');
             } else if (d == 5) {
-                incByOne(y_coord, 'y');
+                y_coord = incByOne(y_coord, 'y');
             }
         }
     }
@@ -146,8 +141,12 @@ public abstract class Critter {
      */
     public static void makeCritter(String critter_class_name) throws InvalidCritterException {
         try {
-            Class c = Class.forName(critter_class_name);
-            Critter crit = (Critter) c.newInstance();
+            Class c = Class.forName(myPackage + "." + critter_class_name);
+            Object obj = c.newInstance();
+            if(!(obj instanceof Critter)){
+                throw new InvalidCritterException(critter_class_name);
+            }
+            Critter crit = (Critter)c.newInstance();
             crit.x_coord = getRandomInt(Params.world_width);
             crit.y_coord = getRandomInt(Params.world_height);
             crit.energy = Params.start_energy;
@@ -172,7 +171,7 @@ public abstract class Critter {
         List<Critter> result = new java.util.ArrayList<Critter>();
         Critter crit;
         try {
-            Class c = Class.forName(critter_class_name);
+            Class c = Class.forName(myPackage + "." +critter_class_name);
             crit = (Critter) c.newInstance();
         } catch (ClassNotFoundException cne) {
             throw new InvalidCritterException(critter_class_name);
@@ -278,17 +277,19 @@ public abstract class Critter {
         for (Critter c : population) {    //each critter does its timestep
             c.doTimeStep();
         }
-        int[][] elevMap = new int[Params.world_height][Params.world_width];
-        for (Critter c : population) {
-            int col = c.x_coord;
-            int row = c.y_coord;
-            elevMap[row][col]++;
-        }
-        for (int row = 0; row < elevMap.length; row++) {
-            for (int col = 0; col < elevMap[0].length; col++) {
-                if (elevMap[row][col] > 1) {    //find all critters in the same position
-                    ArrayList<Integer> same = sameLocation(row, col);
-                    battle(same, row, col);
+        if(population.size()>1) {
+            int[][] elevMap = new int[Params.world_height][Params.world_width];
+            for (Critter c : population) {
+                int col = c.x_coord;
+                int row = c.y_coord;
+                elevMap[row][col]++;
+            }
+            for (int row = 0; row < elevMap.length; row++) {
+                for (int col = 0; col < elevMap[0].length; col++) {
+                    if (elevMap[row][col] > 1) {    //find all critters in the same position
+                        ArrayList<Integer> same = sameLocation(row, col);
+                        battle(same, row, col);
+                    }
                 }
             }
         }
@@ -380,7 +381,7 @@ public abstract class Critter {
         for (int row = 0; row < grid.length; row++) {
             for (int col = 0; col < grid[0].length; col++) {
                 if (grid[row][col] == '\0')
-                    System.out.print(' ');
+                   System.out.print(" ");
                 System.out.print(grid[row][col]);
             }
             System.out.println();

@@ -19,4 +19,5 @@ public class MyCritter6 extends TestCritter {
 	public String toString () {
 		return "5";
 	}
+
 }
