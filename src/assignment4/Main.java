@@ -126,7 +126,7 @@ public class Main {
                     System.out.println("error processing: " + input);
                 }
                 Critter.setSeed(step);
-            } else if (input.substring(0, 5).equals("stats")) {
+            } else if (input.length()>4 && input.substring(0, 5).equals("stats")) {
                 String[] splited = input.split(" ");
                 if (splited.length != 2 ) {
                     System.out.println("error processing: " + input);

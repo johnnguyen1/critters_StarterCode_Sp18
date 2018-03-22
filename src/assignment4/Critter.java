@@ -150,7 +150,11 @@ public abstract class Critter {
             crit.x_coord = getRandomInt(Params.world_width);
             crit.y_coord = getRandomInt(Params.world_height);
             crit.energy = Params.start_energy;
-            population.add(crit);
+            if(critter_class_name.equals("Algae"))
+                babies.add(crit);
+            else
+                population.add(crit);
+
         } catch (ClassNotFoundException cne) {
             throw new InvalidCritterException(critter_class_name);
         } catch (InstantiationException ie) {
@@ -277,6 +281,15 @@ public abstract class Critter {
         for (Critter c : population) {    //each critter does its timestep
             c.doTimeStep();
         }
+        if(population.size()>0) {
+            ArrayList<Integer> dead = new ArrayList<>();
+            for (int i = 0; i < population.size(); i++) {
+                if (population.get(i).energy <= 0) {
+                    dead.add(i);
+                }
+            }
+            remove(dead);
+        }
         if(population.size()>1) {
             int[][] elevMap = new int[Params.world_height][Params.world_width];
             for (Critter c : population) {
@@ -293,9 +306,36 @@ public abstract class Critter {
                 }
             }
         }
+        updateRestEnergy();
+        for(int i = 0; i<Params.refresh_algae_count; i++){
+            try{
+                makeCritter("Algae");
+            }catch (InvalidCritterException ice){
+                System.out.println("error creating Algae");
+            }
+        }
+        population.addAll(babies);
+        babies.clear();
 
     }
-
+    private static void updateRestEnergy() {
+        if(population.size()>0) {
+            ArrayList<Integer> dead = new ArrayList<>();
+            for (int i = 0; i < population.size(); i++) {
+                population.get(i).energy -= Params.rest_energy_cost;
+                if (population.get(i).energy <= 0) {
+                    dead.add(i);
+                }
+            }
+            remove(dead);
+        }
+    }
+    private static void remove(ArrayList<Integer> dead) {
+        for (int i = dead.size() - 1; i >= 0; i--) { //work backward to not confuse indexes
+            int ind = dead.get(i);
+            population.remove(ind);
+        }
+    }
     //returns the indexes of the critters with the specified coordinates
     private static ArrayList<Integer> sameLocation(int row, int col) {
         ArrayList<Integer> sameList = new ArrayList<>();
@@ -307,7 +347,7 @@ public abstract class Critter {
         return sameList;
     }
 
-    public static void battle(ArrayList<Integer> inds, int x, int y) {
+    private static void battle(ArrayList<Integer> inds, int x, int y) {
         //always going to deal with first 2 critters in a list;
         ArrayList<Integer> dead = new ArrayList<>();
         while (inds.size() > 1) {
@@ -382,7 +422,8 @@ public abstract class Critter {
             for (int col = 0; col < grid[0].length; col++) {
                 if (grid[row][col] == '\0')
                    System.out.print(" ");
-                System.out.print(grid[row][col]);
+                else
+                    System.out.print(grid[row][col]);
             }
             System.out.println();
         }
