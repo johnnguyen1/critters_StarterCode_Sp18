@@ -1,11 +1,5 @@
 package assignment4;
-/* CRITTERS MyCritter3.java
- * EE422C Project 4 submission by
- * John Nguyen
- * jhn595
- * Slip days used: <0>
- * Spring 2018
- */
+
 import java.util.*;
 
 public class MyCritter3 extends Critter.TestCritter {
@@ -36,7 +30,6 @@ public class MyCritter3 extends Critter.TestCritter {
     }
     /**
      * prints out the number of times each MyCritter3 has tried to initiate a battle
-     * @param mc3 list of all MyCritter2's in the population
      */
     public static void runStats(java.util.List<Critter> mc3){
         int sum = 0;
