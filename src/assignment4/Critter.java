@@ -150,10 +150,13 @@ public abstract class Critter {
         babies.add(offspring);
     }
     /**
-     * abstract method to determine each critters 
+     * abstract method to determine each critter's timestep
      */
     public abstract void doTimeStep();
 
+    /**
+     * abstract method to determine each critter's fight
+     */
     public abstract boolean fight(String opponent);
 
     /**
@@ -164,7 +167,7 @@ public abstract class Critter {
      * upper. For example, if craig is supplied instead of Craig, an error is thrown instead of
      * an Exception.)
      *
-     * @param critter_class_name
+     * @param critter_class_name name of critter
      * @throws InvalidCritterException
      */
     public static void makeCritter(String critter_class_name) throws InvalidCritterException {
@@ -193,7 +196,7 @@ public abstract class Critter {
      * create and initialize a baby Critter subclass.
      * critter_class_name must be the unqualified name of a concrete subclass of Critter, if not,
      * an InvalidCritterException must be thrown.
-     * @param baby_class_name
+     * @param baby_class_name name of baby critter
      * @throws InvalidCritterException
      */
     public static void makeBaby(String baby_class_name) throws InvalidCritterException {
@@ -249,7 +252,6 @@ public abstract class Critter {
 
     /**
      * Prints out how many Critters of each type there are on the board.
-     *
      * @param critters List of Critters.
      */
     public static void runStats(List<Critter> critters) {
@@ -332,11 +334,14 @@ public abstract class Critter {
         babies.clear();
     }
 
+    /**
+     * Does time step of all critters and removes all of the dead
+     */
     public static void worldTimeStep() {
         for (Critter c : population) {    //each critter does its timestep
             c.doTimeStep();
         }
-        if(population.size()>0) {
+        if(population.size()>0) {   //clears those who die from moving
             ArrayList<Integer> dead = new ArrayList<>();
             for (int i = 0; i < population.size(); i++) {
                 if (population.get(i).energy <= 0) {
@@ -346,7 +351,7 @@ public abstract class Critter {
             remove(dead);
         }
         if(population.size()>1) {
-            int[][] elevMap = new int[Params.world_height][Params.world_width];
+            int[][] elevMap = new int[Params.world_height][Params.world_width]; //grid to determine frequency at a location
             for (Critter c : population) {
                 int col = c.x_coord;
                 int row = c.y_coord;
@@ -361,19 +366,22 @@ public abstract class Critter {
                 }
             }
         }
-        updateRestEnergy();
-        for(int i = 0; i<Params.refresh_algae_count; i++){
+        updateRestEnergy(); //updates rest energy and removes dead
+        for(int i = 0; i<Params.refresh_algae_count; i++){  //creates algae
             try{
                 makeBaby("Algae");
             }catch (InvalidCritterException ice){
                 System.out.println("error creating Algae");
             }
         }
-        population.addAll(babies);
+        population.addAll(babies);  //add all children and algae
         babies.clear();
 
     }
 
+    /**
+     * updates rest energy and removes dead critters
+     */
     private static void updateRestEnergy() {
         if(population.size()>0) {
             ArrayList<Integer> dead = new ArrayList<>();
@@ -387,13 +395,23 @@ public abstract class Critter {
         }
     }
 
+    /**
+     * removes dead critters given a list
+     * @param dead list of dead critters' indexes
+     */
     private static void remove(ArrayList<Integer> dead) {
         for (int i = dead.size() - 1; i >= 0; i--) { //work backward to not confuse indexes
             int ind = dead.get(i);
             population.remove(ind);
         }
     }
-    //returns the indexes of the critters with the specified coordinates
+
+    /**
+     * Determines which creatures have the same location as the specified coordinate
+     * @param row x position
+     * @param col y position
+     * @return list the indexes of the critters with the specified position
+     */
     public static ArrayList<Integer> sameLocation(int row, int col) {
         ArrayList<Integer> sameList = new ArrayList<>();
         for (int i = 0; i < population.size(); i++) {
@@ -403,7 +421,11 @@ public abstract class Critter {
         }
         return sameList;
     }
-
+    /**
+     * Handles encounters for every critter in a specified location
+     * @param x x position
+     * @param y y position
+     */
     private static void battle(ArrayList<Integer> inds, int x, int y) {
         //always going to deal with first 2 critters in a list;
         ArrayList<Integer> dead = new ArrayList<>();
@@ -451,6 +473,9 @@ public abstract class Critter {
 
     }
 
+    /**
+     * displays world as it is right now
+     */
     public static void displayWorld() {
         char[][] grid = new char[Params.world_height + 2][Params.world_width + 2];
         //this handles the border printing
@@ -486,13 +511,23 @@ public abstract class Critter {
         }
     }
 
-    public boolean flee(char c, int dir){
+    /**
+     * determines if a critter can flee from fight
+     * @param rw run or walk
+     * @param dir direction you want to run
+     * @return true if you can run away
+     */
+    public boolean flee(char rw, int dir){
         int x = this.x_coord;
         int y = this.y_coord;
         int iter = 1;
-        if(c == 'r'){
+        if(rw == 'r'){
             iter = 2;
         }
+        if(iter==1 && energy<Params.walk_energy_cost)   //see if it can run away
+            return false;
+        if(iter==2 && energy<Params.run_energy_cost)    //see if it can run away
+            return false;
         int d = dir;
         for(int i = 0; i<2; i++) {
             if (d == 2) {
