@@ -6,7 +6,7 @@ public class MyCritter2 extends Critter {
     private int fled = 0;
     @Override
     /**
-     * reproduces a critter to the position above
+     * reproduces a MyCritter2 to the position above
      */
     public void doTimeStep() {
         MyCritter2 baby = new MyCritter2();
@@ -15,7 +15,7 @@ public class MyCritter2 extends Critter {
 
     @Override
     /**
-     * always tries to flee a battle or die
+     * always tries to flee in a battle
      * @return false but has the opportunity to run away
      */
     public boolean fight(String opponent) {
@@ -33,7 +33,7 @@ public class MyCritter2 extends Critter {
         return "2";
     }
     /**
-     * prints our the number of times each MyCritter2 has fled a battle
+     * prints out the number of times each MyCritter2 has fled a battle
      */
     public static void runStats(java.util.List<Critter> mc2){
         int sum = 0;
