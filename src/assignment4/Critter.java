@@ -64,6 +64,11 @@ public abstract class Critter {
     7 - right down
 
      */
+
+    /**
+     * walks a critter in a specified direction
+     * @param direction the direction (0-8) of where the critter will walk
+     */
     protected final void walk(int direction) {
         energy -= Params.walk_energy_cost;
         int d = direction;
@@ -88,6 +93,22 @@ public abstract class Critter {
         }
     }
 
+    /**
+     * runs a critter in a specified direction
+     * @param direction the direction (0-8) of where the critter will run
+     */
+    protected final void run(int direction) {   //how to do without zig zag
+        energy += (2 * Params.walk_energy_cost);
+        energy -= Params.run_energy_cost;
+        walk(direction);
+        walk(direction);
+    }
+
+    /**
+     * decreases a critter 1 unit on an axis, ensures cyclic movement
+     * @param coord the x or y coordinate
+     * @param axis x or y axis
+     */
     private static int decByOne(int coord, char axis) { //0 is x, 1 is y
         int ax = Params.world_width;
         if (axis == 'y')
@@ -99,6 +120,11 @@ public abstract class Critter {
         return coord;
     }
 
+    /**
+     * increases a critter 1 unit on an axis, ensures cyclic movement
+     * @param coord the x or y coordinate
+     * @param axis x or y axis
+     */
     private static int incByOne(int coord, char axis) { //0 is x, 1 is y
         int ax = Params.world_width;
         if (axis == 'y')
@@ -107,13 +133,12 @@ public abstract class Critter {
         return coord;
     }
 
-    protected final void run(int direction) {   //how to do without zig zag
-        energy += (2 * Params.walk_energy_cost);
-        energy -= Params.run_energy_cost;
-        walk(direction);
-        walk(direction);
-    }
 
+    /**
+     * sets an offspring's stats and places it in an adjacent position of its parent
+     * @param offspring the critter offspring
+     * @param direction is where the offspring is to be placed
+     */
     protected final void reproduce(Critter offspring, int direction) {
         if(energy < Params.min_reproduce_energy) return;
         energy = (int)Math.ceil((double)energy/2.0);
@@ -122,8 +147,11 @@ public abstract class Critter {
         offspring.y_coord = this.y_coord;
         offspring.energy += Params.walk_energy_cost;
         offspring.walk(direction);
+        babies.add(offspring);
     }
-
+    /**
+     * abstract method to determine each critters 
+     */
     public abstract void doTimeStep();
 
     public abstract boolean fight(String opponent);
@@ -150,10 +178,7 @@ public abstract class Critter {
             crit.x_coord = getRandomInt(Params.world_width);
             crit.y_coord = getRandomInt(Params.world_height);
             crit.energy = Params.start_energy;
-            if(critter_class_name.equals("Algae"))
-                babies.add(crit);
-            else
-                population.add(crit);
+            population.add(crit);
 
         } catch (ClassNotFoundException cne) {
             throw new InvalidCritterException(critter_class_name);
@@ -161,6 +186,36 @@ public abstract class Critter {
             throw new InvalidCritterException(critter_class_name);
         } catch (IllegalAccessException iae) {
             throw new InvalidCritterException(critter_class_name);
+        }
+    }
+
+    /**
+     * create and initialize a baby Critter subclass.
+     * critter_class_name must be the unqualified name of a concrete subclass of Critter, if not,
+     * an InvalidCritterException must be thrown.
+     * @param baby_class_name
+     * @throws InvalidCritterException
+     */
+    public static void makeBaby(String baby_class_name) throws InvalidCritterException {
+        try {
+            Class b = Class.forName(myPackage + "." + baby_class_name);
+            Object obj = b.newInstance();
+            if(!(obj instanceof Critter)){
+                throw new InvalidCritterException(baby_class_name);
+            }
+            Critter baby = (Critter)b.newInstance();
+            baby.y_coord = getRandomInt(Params.world_height);
+            baby.x_coord = getRandomInt(Params.world_width);
+            baby.energy = Params.start_energy;
+            babies.add(baby);
+
+
+        } catch (InstantiationException ie) {
+            throw new InvalidCritterException(baby_class_name);
+        } catch (IllegalAccessException iae) {
+            throw new InvalidCritterException(baby_class_name);
+        } catch (ClassNotFoundException cne) {
+            throw new InvalidCritterException(baby_class_name);
         }
     }
 
@@ -309,7 +364,7 @@ public abstract class Critter {
         updateRestEnergy();
         for(int i = 0; i<Params.refresh_algae_count; i++){
             try{
-                makeCritter("Algae");
+                makeBaby("Algae");
             }catch (InvalidCritterException ice){
                 System.out.println("error creating Algae");
             }
@@ -318,6 +373,7 @@ public abstract class Critter {
         babies.clear();
 
     }
+
     private static void updateRestEnergy() {
         if(population.size()>0) {
             ArrayList<Integer> dead = new ArrayList<>();
@@ -330,6 +386,7 @@ public abstract class Critter {
             remove(dead);
         }
     }
+
     private static void remove(ArrayList<Integer> dead) {
         for (int i = dead.size() - 1; i >= 0; i--) { //work backward to not confuse indexes
             int ind = dead.get(i);
@@ -337,7 +394,7 @@ public abstract class Critter {
         }
     }
     //returns the indexes of the critters with the specified coordinates
-    private static ArrayList<Integer> sameLocation(int row, int col) {
+    public static ArrayList<Integer> sameLocation(int row, int col) {
         ArrayList<Integer> sameList = new ArrayList<>();
         for (int i = 0; i < population.size(); i++) {
             if (population.get(i).x_coord == col && population.get(i).y_coord == row) {
@@ -427,5 +484,46 @@ public abstract class Critter {
             }
             System.out.println();
         }
+    }
+
+    public boolean flee(char c, int dir){
+        int x = this.x_coord;
+        int y = this.y_coord;
+        int iter = 1;
+        if(c == 'r'){
+            iter = 2;
+        }
+        int d = dir;
+        for(int i = 0; i<2; i++) {
+            if (d == 2) {
+                y = decByOne(y, 'y');
+            } else if (d == 6) {
+                y = incByOne(y, 'y');
+            } else if (d == 0 || d == 1 || d == 7) {
+                x = incByOne(x, 'x');
+                if (d == 1) {
+                    y = decByOne(y, 'y');
+                } else if (d == 7) {
+                    y = incByOne(y, 'y');
+                }
+            } else if (d == 3 || d == 4 || d == 5) {
+                x = decByOne(x, 'x');
+                if (d == 3) {
+                    y = decByOne(y, 'y');
+                } else if (d == 5) {
+                    y = incByOne(y, 'y');
+                }
+            }
+        }
+        if(sameLocation(x, y).size()>0){
+            if(iter==1){
+                this.energy -= Params.walk_energy_cost;
+            }else if(iter==2){
+                this.energy -= Params.run_energy_cost;
+            }
+            return false;
+        }
+        else
+            return true;
     }
 }

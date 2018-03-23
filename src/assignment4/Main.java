@@ -95,15 +95,15 @@ public class Main {
         int count = 0;
         String input = "";
         while (true) {
-            System.out.print("critter>");
+            System.out.print("critter>");   //prompt user
             input = kb.nextLine();
             if (input.length() < 4) {
                 System.out.println("error processing: " + input);
                 continue;
             }
-            if (input.equals("show")) {
+            if (input.equals("show")) {     //displays World
                 Critter.displayWorld();
-            } else if (input.substring(0, 4).equals("step") || input.equals("step")) {
+            } else if (input.substring(0, 4).equals("step") || input.equals("step")) {  //time step
                 int step = 0;
                 if (input.equals("step")) {
                     Critter.worldTimeStep();
@@ -118,7 +118,7 @@ public class Main {
                     Critter.worldTimeStep();
                 }
                 continue;
-            } else if (input.substring(0, 4).equals("seed")) {
+            } else if (input.substring(0, 4).equals("seed")) {  //seed world
                 long step = 0;
                 try {
                     step = Long.parseLong(input.substring(5, input.length()));
@@ -126,7 +126,7 @@ public class Main {
                     System.out.println("error processing: " + input);
                 }
                 Critter.setSeed(step);
-            } else if (input.length()>4 && input.substring(0, 5).equals("stats")) {
+            } else if (input.length()>4 && input.substring(0, 5).equals("stats")) { //displays stats of specific critter
                 String[] splited = input.split(" ");
                 if (splited.length != 2 ) {
                     System.out.println("error processing: " + input);
@@ -143,13 +143,11 @@ public class Main {
                 try {
                     Class c = Class.forName(myPackage + "." + class_name);
                     java.lang.reflect.Method method = c.getMethod("runStats", java.util.List.class);
-                    method.invoke(c, stat);
+                    method.invoke(c, stat);     //use reflection to use proper runStats
                 } catch (Throwable e) {
                     System.out.println("error processing: " + input);
                 }
-
-
-
+                //makes critters
             } else if (input.substring(0, 4).equals("make")) {
                 String[] splited = input.split(" ");
                 if (splited.length != 3 ) {
@@ -171,6 +169,7 @@ public class Main {
                         break;
                     }
                 }
+                //quits
             } else if(input.equals("quit")){
                 break;
             } else {
@@ -179,7 +178,6 @@ public class Main {
             }
 
         }
-
         //Write your code above
         System.out.flush();
 
